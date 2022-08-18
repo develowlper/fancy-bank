@@ -1,6 +1,6 @@
 import { Routes as BrowserRoutes, Route } from 'react-router-dom';
 import App from './App';
-import Signin from './pages/SignIn';
+import Signin from './pages/Signin';
 
 export default function Routes() {
   return (
