@@ -1,51 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+
 import { supabase } from '../supabaseClient';
 
-export default function Auth() {
-  const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
+export default function Auth({ children }) {
+  const [session, setSession] = useState(supabase.auth.session());
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = supabase.auth.session();
+      return data;
+    };
 
-    try {
-      setLoading(true);
-      const { error } = await supabase.auth.signInWithOtp({ email });
-      if (error) throw error;
-      alert('Check your email for the login link!');
-    } catch (error) {
-      alert(error.error_description || error.message);
-    } finally {
-      setLoading(false);
+    if (!session) {
+      fetchData()
+        .then((session) => {
+          setSession(session);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
-  };
 
-  return (
-    <div className="row flex-center flex">
-      <div className="col-6 form-widget" aria-live="polite">
-        <h1 className="header">Supabase + React</h1>
-        <p className="description">
-          Sign in via magic link with your email below
-        </p>
-        {loading ? (
-          'Sending magic link...'
-        ) : (
-          <form onSubmit={handleLogin}>
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              className="inputField"
-              type="email"
-              placeholder="Your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <button className="button block" aria-live="polite">
-              Send magic link
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
-  );
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+  }, [session]);
+
+  if (!session) {
+    return <Navigate to="/signin" />;
+  }
+
+  return children;
 }

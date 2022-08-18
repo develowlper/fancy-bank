@@ -1,9 +1,11 @@
-import { Euro } from '@mui/icons-material';
+import { BalanceRounded, Euro } from '@mui/icons-material';
 import {
+  Alert,
   Box,
   Button,
   Grid,
   InputAdornment,
+  LinearProgress,
   TextField,
   Typography,
 } from '@mui/material';
@@ -14,6 +16,8 @@ import zustand from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { nanoid } from 'nanoid';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '../supabaseClient';
 
 const store = (set) => ({
   amounts: [],
@@ -33,9 +37,38 @@ export default function Banking() {
     formState: { errors },
   } = useForm();
 
-  const addAmount = useStore((state) => state.addAmount);
-  const amounts = useStore((state) => state.amounts);
-  const onSubmit = (data) => addAmount(Number(data.amount));
+  const { data, isLoading } = useQuery(['balances'], () =>
+    supabase
+      .from('balances')
+      .select('*')
+      .order('created_at', { ascending: false })
+  );
+
+  const queryClient = useQueryClient();
+
+  const balances = data?.data;
+  const error = data?.error;
+
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
+
+  if (isLoading) {
+    return <LinearProgress />;
+  }
+
+  // useStore((state) => state.amounts);
+  const onSubmit = async (data) => {
+    const { data: res, error } = await supabase
+      .from('balances')
+      .insert([
+        { created_by: supabase.auth.user().id, amount: Number(data.amount) },
+      ]);
+
+    queryClient.invalidateQueries('balances');
+
+    console.log(error, data);
+  };
   return (
     <Container component="main">
       <Box
@@ -65,8 +98,8 @@ export default function Banking() {
       </Box>
       <Box>
         <Box component="ul" sx={{ listStyle: 'none' }}>
-          {amounts.map((amount) => (
-            <Box component="li" key={amount.key}>
+          {balances.map((balance) => (
+            <Box component="li" key={balance.id}>
               <Grid container spacing={2} alignItems="flex-end">
                 <Grid item>
                   <Box>
@@ -74,9 +107,7 @@ export default function Banking() {
                   </Box>
                 </Grid>
                 <Grid>
-                  <Typography component="div" key={amount.key}>
-                    {amount.value}
-                  </Typography>
+                  <Typography component="div">{balance.amount}</Typography>
                 </Grid>
               </Grid>
             </Box>
