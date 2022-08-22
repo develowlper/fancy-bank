@@ -93,13 +93,11 @@ export default function Banking() {
           container
           spacing={2}
           direction="column"
-          component="ul"
           sx={{ listStyle: 'none' }}
         >
           {balances.map((balance) => (
             <Grid
               item
-              component="li"
               key={balance.id}
               sx={{ bgcolor: alpha(theme.palette.primary.main, 0.2) }}
             >
