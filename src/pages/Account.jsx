@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 
 const Account = ({ session }) => {
@@ -6,37 +6,6 @@ const Account = ({ session }) => {
   const [username, setUsername] = useState(null);
   const [website, setWebsite] = useState(null);
   const [avatar_url, setAvatarUrl] = useState(null);
-
-  useEffect(() => {
-    getProfile();
-  }, [session]);
-
-  const getProfile = async () => {
-    try {
-      setLoading(true);
-      const { user } = session;
-
-      let { data, error, status } = await supabase
-        .from('profiles')
-        .select(`username, website, avatar_url`)
-        .eq('id', user.id)
-        .single();
-
-      if (error && status !== 406) {
-        throw error;
-      }
-
-      if (data) {
-        setUsername(data.username);
-        setWebsite(data.website);
-        setAvatarUrl(data.avatar_url);
-      }
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const updateProfile = async (e) => {
     e.preventDefault();
@@ -64,6 +33,37 @@ const Account = ({ session }) => {
       setLoading(false);
     }
   };
+
+  const getProfile = useCallback(async (session) => {
+    try {
+      setLoading(true);
+      const { user } = session;
+
+      let { data, error, status } = await supabase
+        .from('profiles')
+        .select(`username, website, avatar_url`)
+        .eq('id', user.id)
+        .single();
+
+      if (error && status !== 406) {
+        throw error;
+      }
+
+      if (data) {
+        setUsername(data.username);
+        setWebsite(data.website);
+        setAvatarUrl(data.avatar_url);
+      }
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    getProfile(session);
+  }, [getProfile, session]);
 
   return (
     <div aria-live="polite">

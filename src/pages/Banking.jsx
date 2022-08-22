@@ -1,4 +1,4 @@
-import { BalanceRounded, Euro } from '@mui/icons-material';
+import { Euro } from '@mui/icons-material';
 import {
   Alert,
   Box,
@@ -8,34 +8,18 @@ import {
   LinearProgress,
   TextField,
   Typography,
+  useTheme,
 } from '@mui/material';
-import { Container } from '@mui/system';
+import { Container, alpha } from '@mui/system';
 
 import { useForm } from 'react-hook-form';
-import zustand from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
-import { immer } from 'zustand/middleware/immer';
-import { nanoid } from 'nanoid';
+
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../supabaseClient';
 
-const store = (set) => ({
-  amounts: [],
-  addAmount: (value) =>
-    set((state) => {
-      state.amounts.push({ value, key: nanoid() });
-    }),
-});
-
-const useStore = zustand(devtools(persist(immer(store), { name: 'banking' })));
-
 export default function Banking() {
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm();
+  const { register, handleSubmit } = useForm();
+  const theme = useTheme();
 
   const { data, isLoading } = useQuery(['balances'], () =>
     supabase
@@ -57,18 +41,19 @@ export default function Banking() {
     return <LinearProgress />;
   }
 
-  // useStore((state) => state.amounts);
   const onSubmit = async (data) => {
-    const { data: res, error } = await supabase
+    await supabase
       .from('balances')
       .insert([
         { created_by: supabase.auth.user().id, amount: Number(data.amount) },
       ]);
 
     queryClient.invalidateQueries('balances');
-
-    console.log(error, data);
   };
+
+  const difference =
+    balances[0]?.amount - balances[balances.length - 1]?.amount;
+
   return (
     <Container component="main">
       <Box
@@ -97,22 +82,40 @@ export default function Banking() {
         <Button type="submit">Send</Button>
       </Box>
       <Box>
-        <Box component="ul" sx={{ listStyle: 'none' }}>
+        <Typography
+          sx={{ color: difference > 0 ? 'success.main' : 'error.main' }}
+        >
+          Balance: {difference} <Euro fontSize="small" sx={{ ml: 1 }} />
+        </Typography>
+      </Box>
+      <Box>
+        <Grid
+          container
+          spacing={2}
+          direction="column"
+          component="ul"
+          sx={{ listStyle: 'none' }}
+        >
           {balances.map((balance) => (
-            <Box component="li" key={balance.id}>
-              <Grid container spacing={2} alignItems="flex-end">
+            <Grid
+              item
+              component="li"
+              key={balance.id}
+              sx={{ bgcolor: alpha(theme.palette.primary.main, 0.2) }}
+            >
+              <Grid container spacing={1} alignItems="flex-end">
                 <Grid item>
                   <Box>
-                    <Euro size="small" />
+                    <Euro fontSize="small" />
                   </Box>
                 </Grid>
-                <Grid>
+                <Grid item>
                   <Typography component="div">{balance.amount}</Typography>
                 </Grid>
               </Grid>
-            </Box>
+            </Grid>
           ))}
-        </Box>
+        </Grid>
       </Box>
     </Container>
   );
