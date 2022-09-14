@@ -3,7 +3,7 @@ import { Navigate, useLoaderData } from 'react-router-dom';
 
 import { supabase } from '../supabaseClient';
 
-export default function Auth({ children }) {
+export default function Auth({ children, skip = false }) {
   const { session } = useLoaderData();
 
   useEffect(() => {
@@ -11,6 +11,10 @@ export default function Auth({ children }) {
       window.location.reload();
     });
   }, []);
+
+  if (skip) {
+    return children;
+  }
 
   if (!session) {
     return <Navigate to="/signin" />;

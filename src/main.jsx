@@ -21,6 +21,18 @@ const apploader = () => {
   return { session: supabase.auth.session() };
 };
 
+const bankingLoader = () => {
+  const res = supabase
+    .from('balances')
+    .select('*')
+    .order('created_at', { ascending: false });
+  const { error } = res;
+  if (error) {
+    throw error;
+  }
+  return res;
+};
+
 const router = createBrowserRouter([
   {
     path: '/*',
@@ -32,6 +44,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'banking',
+        loader: bankingLoader,
         element: <Banking />,
       },
     ],

@@ -5,7 +5,6 @@ import {
   Button,
   Grid,
   InputAdornment,
-  LinearProgress,
   TextField,
   Typography,
   useTheme,
@@ -14,31 +13,24 @@ import { Container, alpha } from '@mui/system';
 
 import { useForm } from 'react-hook-form';
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../supabaseClient';
+import { useLoaderData } from 'react-router';
 
 export default function Banking() {
   const { register, handleSubmit } = useForm();
   const theme = useTheme();
+  const loaderData = useLoaderData();
 
-  const { data, isLoading } = useQuery(['balances'], () =>
-    supabase
-      .from('balances')
-      .select('*')
-      .order('created_at', { ascending: false })
-  );
+  const { data, error } = loaderData;
+  console.log(data);
 
   const queryClient = useQueryClient();
 
-  const balances = data?.data;
-  const error = data?.error;
+  const balances = data;
 
   if (error) {
     return <Alert severity="error">{error}</Alert>;
-  }
-
-  if (isLoading) {
-    return <LinearProgress />;
   }
 
   const onSubmit = async (data) => {

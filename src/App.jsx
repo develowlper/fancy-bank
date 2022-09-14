@@ -12,7 +12,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
       <Navigation />
-      <Auth>
+      <Auth skip={true}>
         <Outlet />
       </Auth>
     </QueryClientProvider>
