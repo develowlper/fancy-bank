@@ -1,6 +1,5 @@
-import { Route, Routes } from 'react-router-dom';
-import Home from './pages/Home';
-import Banking from './pages/Banking';
+import { Outlet } from 'react-router-dom';
+
 import Navigation from './components/Navigation';
 import Auth from './components/Auth';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -14,10 +13,7 @@ export default function App() {
       <ReactQueryDevtools initialIsOpen={false} />
       <Navigation />
       <Auth>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="banking" element={<Banking />} />
-        </Routes>
+        <Outlet />
       </Auth>
     </QueryClientProvider>
   );
