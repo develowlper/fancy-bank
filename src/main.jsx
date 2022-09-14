@@ -7,6 +7,7 @@ import App from './App';
 import './index.css';
 import Signin from './pages/Signin';
 import Home from './pages/Home';
+import Banking from './pages/Banking';
 import { supabase } from './supabaseClient';
 // import Routes from './Routes';
 
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
     children: [
       {
         element: <Home />,
+      },
+      {
+        path: 'banking',
+        element: <Banking />,
       },
     ],
   },
