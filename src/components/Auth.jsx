@@ -1,34 +1,16 @@
 import { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLoaderData } from 'react-router-dom';
 
 import { supabase } from '../supabaseClient';
 
-import { useAuthStore } from '../stores/auth.store';
-
 export default function Auth({ children }) {
-  const session = useAuthStore((state) => state.session);
-  const setSession = useAuthStore((state) => state.setSession);
+  const { session } = useLoaderData();
 
   useEffect(() => {
-    const fetchData = async () => {
-      const data = supabase.auth.session();
-      return data;
-    };
-
-    if (!session) {
-      fetchData()
-        .then((session) => {
-          setSession(session);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
-
     supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+      window.location.reload();
     });
-  }, [session, setSession]);
+  }, []);
 
   if (!session) {
     return <Navigate to="/signin" />;

@@ -7,6 +7,7 @@ import App from './App';
 import './index.css';
 import Signin from './pages/Signin';
 import Home from './pages/Home';
+import { supabase } from './supabaseClient';
 // import Routes from './Routes';
 
 const theme = createTheme({
@@ -15,10 +16,15 @@ const theme = createTheme({
   },
 });
 
+const apploader = () => {
+  return { session: supabase.auth.session() };
+};
+
 const router = createBrowserRouter([
   {
     path: '/*',
     element: <App />,
+    loader: apploader,
     children: [
       {
         element: <Home />,
