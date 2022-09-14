@@ -1,5 +1,4 @@
-import { Link, Typography } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Typography } from '@mui/material';
 
 export default function Home() {
   return (

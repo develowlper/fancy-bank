@@ -85,7 +85,8 @@ export default function Banking() {
         <Typography
           sx={{ color: difference > 0 ? 'success.main' : 'error.main' }}
         >
-          Balance: {difference} <Euro fontSize="small" sx={{ ml: 1 }} />
+          Balance: {difference.toFixed(2)}{' '}
+          <Euro fontSize="small" sx={{ ml: 1 }} />
         </Typography>
       </Box>
       <Box>
